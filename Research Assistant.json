@@ -1,0 +1,201 @@
+{
+  "name": "Research Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        80,
+        -256
+      ],
+      "id": "1b5fa7f1-aeba-485b-9bb9-accc47815412",
+      "name": "When chat message received",
+      "webhookId": "4133463e-1c37-49b0-8ddf-ac51dcb244b6"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are my academic research assistant. I want you to help me research the following topic: \n\n\"{{ $json.chatInput }}\"\n\nInstructions:\n1. Use Tavily Search to find the most relevant and recent academic resources.\n2. Summarize key findings, methodologies, and conclusions.\n3. Include full references or URLs for each source.\n4. Highlight any gaps or open questions in the research.\n5. Present the information clearly so it can be used in a literature review or research proposal.\n\nPlease begin by searching Tavily for relevant resources on this topic.\n",
+        "options": {
+          "systemMessage": "=You are an Academic Research Assistant. Your goal is to help users find, summarize, and organize scholarly research information efficiently. \nYou have access to the Tavily Search tool, which you can use to retrieve academic papers, articles, and datasets. \n\nGuidelines:\n- Always use Tavily Search to gather information before giving answers.\n- Provide concise summaries of relevant research findings.\n- Include sources with URLs when possible.\n- Organize information logically (e.g., by topic, methodology, results).\n- Suggest next steps for further research or related studies.\n- If a topic is ambiguous, ask clarifying questions before searching.\n- Present results in a structured academic style (bullet points, sections, or tables if needed).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        304,
+        -256
+      ],
+      "id": "6912ca15-1e38-4d5c-a350-b92fe5a59d43",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        288,
+        -80
+      ],
+      "id": "3093fea8-d1ca-4ab5-80df-caf3b2e6e176",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QWjOgmDP9uXj62SV",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -16
+      ],
+      "id": "30a80101-f142-41cc-9b4c-d3817bbaca2f",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "r1i1KKdVdn6qhVbR",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "options": {}
+      },
+      "id": "ec60f5d8-b03d-455c-856c-d3d66cf632a0",
+      "name": "Convert to HTML",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {}
+      },
+      "id": "97494f0b-9e42-4da9-af6b-e98e5edd52ea",
+      "name": "Convert to PDF",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        -256
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "031c2e0a-54db-4199-85f1-5fddadb595c1",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to PDF": {
+      "main": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f50a957d-4942-4b29-ab1e-a05aff3a4993",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e5428a8fe932eaafef9dcb2ee4ccfd50b69ba8fc4311f54201d0f7206ab7ea9c"
+  },
+  "id": "Db4ENxujXIlf3vvG",
+  "tags": []
+}
